@@ -1,59 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Timer</title>
-</head>
-<body>
+let timerInterval;
+let seconds = 0;
+let minutes = 0;
+let hours = 0;
 
-<h1>Simple Timer</h1>
-
-<button onclick="startTimer()">Start</button>
-<button onclick="resetTimer()">Reset</button>
-
-<p id="timer">00:00:00</p>
-
-<script>
-    let timerInterval;
-    let seconds = 0;
-    let minutes = 0;
-    let hours = 0;
-
-    function startTimer() {
-        if (!timerInterval) {
-            timerInterval = setInterval(updateTimer, 1000);
-        }
+async function startTimer() {
+    if (!timerInterval) {
+        timerInterval = setInterval(updateTimer, 1000);
     }
+}
 
-    function resetTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
+async function resetTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    seconds = 0;
+    minutes = 0;
+    hours = 0;
+    updateTimer();
+    await saveTimer();
+}
+
+async function updateTimer() {
+    seconds++;
+    if (seconds === 60) {
         seconds = 0;
-        minutes = 0;
-        hours = 0;
-        updateTimer();
-    }
-
-    function updateTimer() {
-        seconds++;
-        if (seconds === 60) {
-            seconds = 0;
-            minutes++;
-            if (minutes === 60) {
-                minutes = 0;
-                hours++;
-            }
+        minutes++;
+        if (minutes === 60) {
+            minutes = 0;
+            hours++;
         }
-
-        const formattedTime = pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
-        document.getElementById("timer").innerText = formattedTime;
     }
 
-    function pad(value) {
-        return value < 10 ? "0" + value : value;
-    }
-</script>
+    const formattedTime = pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
+    document.getElementById("timer").innerText = formattedTime;
 
-</body>
-</html>
+    // Save timer value to the server
+    await saveTimer();
+}
+
+async function saveTimer() {
+    const timerData = { hours, minutes, seconds };
+    const response = await fetch('http://localhost:3000/timer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(timerData),
+    });
+
+    const result = await response.json();
+    console.log(result);
+}
+
+async function loadTimer() {
+    const response = await fetch('http://localhost:3000/timer');
+    const data = await response.json();
+
+    hours = data.hours;
+    minutes = data.minutes;
+    seconds = data.seconds;
+
+    updateTimer();
+}
+
+function pad(value) {
+    return value < 10 ? "0" + value : value;
+}
+
+// Load the timer data when the page is loaded
+window.onload = loadTimer;
