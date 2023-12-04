@@ -39,8 +39,7 @@
     <script>
         let bonkInterval;
         let bonkStartTime;
-        let bonkLongestTime = parseInt(localStorage.getItem('bonkLongestTime')) || 0;
-
+        let bonkLongestTime = 0;
         function startStopTimer() {
             if (bonkInterval) {
                 stopTimer();
