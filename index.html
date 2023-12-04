@@ -57,22 +57,24 @@
         function stopTimer() {
             clearInterval(bonkInterval);
             const currentTime = new Date().getTime();
-            const elapsedTime = Math.floor((currentTime - bonkStartTime) / 1000);
-            if (elapsedTime > bonkLongestTime) {
-                bonkLongestTime = elapsedTime;
-                updateLeaderboard();
+            if (bonkStartTime) {
+                const elapsedTime = Math.floor((currentTime - bonkStartTime) / 1000);
+                if (elapsedTime > bonkLongestTime) {
+                    bonkLongestTime = elapsedTime;
+                    updateLeaderboard();
+                }
             }
         }
 
         function resetTimer() {
             clearInterval(bonkInterval);
-            document.getElementById('bonkTimer').innerText = '00:00';
             bonkStartTime = null;
+            updateTimerDisplay();
         }
 
         function updateTimerDisplay() {
             const currentTime = new Date().getTime();
-            const elapsedTime = Math.floor((currentTime - bonkStartTime) / 1000);
+            const elapsedTime = bonkStartTime ? Math.floor((currentTime - bonkStartTime) / 1000) : 0;
             const minutes = Math.floor(elapsedTime / 60);
             const seconds = elapsedTime % 60;
             const displayMinutes = minutes < 10 ? '0' + minutes : minutes;
