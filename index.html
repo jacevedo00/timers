@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timers</title>
+    <title>Bonk Timer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,81 +31,66 @@
     <div class="timer-container">
         <h1>Bonk Timer</h1>
         <div id="bonkTimer" class="timer">00:00</div>
-        <button onclick="startTimer('bonkTimer')">Start</button>
-        <button onclick="stopTimer('bonkTimer')">Stop</button>
-        <button onclick="resetTimer('bonkTimer')">Reset</button>
-        <div id="bonkLeaderboard">Highest Time: <span id="bonkHighestTime">00:00</span></div>
-    </div>
-
-    <div class="timer-container">
-        <h1>James BRB Timer</h1>
-        <div id="jamesTimer" class="timer">00:00</div>
-        <button onclick="startTimer('jamesTimer')">Start</button>
-        <button onclick="stopTimer('jamesTimer')">Stop</button>
-        <button onclick="resetTimer('jamesTimer')">Reset</button>
-        <div id="jamesLeaderboard">Highest Time: <span id="jamesHighestTime">00:00</span></div>
+        <button onclick="startStopTimer()">Start/Stop</button>
+        <button onclick="resetTimer()">Reset</button>
+        <div id="bonkLeaderboard">Longest Time: <span id="bonkLongestTime">00:00</span></div>
     </div>
 
     <script>
-        function startTimer(timerId) {
-            clearInterval(window[timerId + 'Timer']);
-            window[timerId + 'Timer'] = setInterval(function () {
-                window[timerId + 'Seconds']++;
-                if (window[timerId + 'Seconds'] === 60) {
-                    window[timerId + 'Seconds'] = 0;
-                    window[timerId + 'Minutes']++;
-                }
-                updateTimerDisplay(timerId);
-                updateLocalStorage(timerId);
-            }, 1000);
-        }
+        let bonkInterval;
+        let bonkStartTime;
+        let bonkLongestTime = parseInt(localStorage.getItem('bonkLongestTime')) || 0;
 
-        function stopTimer(timerId) {
-            clearInterval(window[timerId + 'Timer']);
-            updateLocalStorage(timerId);
-        }
-
-        function resetTimer(timerId) {
-            clearInterval(window[timerId + 'Timer']);
-            window[timerId + 'Seconds'] = 0;
-            window[timerId + 'Minutes'] = 0;
-            updateTimerDisplay(timerId);
-            updateLocalStorage(timerId);
-        }
-
-        function updateTimerDisplay(timerId) {
-            const displayMinutes = window[timerId + 'Minutes'] < 10 ? '0' + window[timerId + 'Minutes'] : window[timerId + 'Minutes'];
-            const displaySeconds = window[timerId + 'Seconds'] < 10 ? '0' + window[timerId + 'Seconds'] : window[timerId + 'Seconds'];
-            document.getElementById(timerId).innerText = `${displayMinutes}:${displaySeconds}`;
-        }
-
-        function updateLocalStorage(timerId) {
-            localStorage.setItem(timerId + 'Seconds', window[timerId + 'Seconds']);
-            localStorage.setItem(timerId + 'Minutes', window[timerId + 'Minutes']);
-
-            const highestTime = localStorage.getItem(timerId + 'HighestTime') || '00:00';
-            const currentTotalSeconds = window[timerId + 'Minutes'] * 60 + window[timerId + 'Seconds'];
-            const highestTotalSeconds = parseInt(highestTime.split(':')[0]) * 60 + parseInt(highestTime.split(':')[1]);
-
-            if (currentTotalSeconds > highestTotalSeconds) {
-                localStorage.setItem(timerId + 'HighestTime', `${window[timerId + 'Minutes']}:${window[timerId + 'Seconds']}`);
-                updateLeaderboard(timerId);
+        function startStopTimer() {
+            if (bonkInterval) {
+                stopTimer();
+            } else {
+                startTimer();
             }
         }
 
-        function updateLeaderboard(timerId) {
-            const highestTime = localStorage.getItem(timerId + 'HighestTime') || '00:00';
-            document.getElementById(timerId + 'HighestTime').innerText = highestTime;
+        function startTimer() {
+            bonkStartTime = new Date().getTime();
+            bonkInterval = setInterval(updateTimerDisplay, 1000);
         }
 
-        // Initialize timers and leaderboards
-        ['bonk', 'james'].forEach(function (timerPrefix) {
-            window[timerPrefix + 'Timer'] = null;
-            window[timerPrefix + 'Seconds'] = parseInt(localStorage.getItem(timerPrefix + 'Seconds')) || 0;
-            window[timerPrefix + 'Minutes'] = parseInt(localStorage.getItem(timerPrefix + 'Minutes')) || 0;
-            updateTimerDisplay(timerPrefix + 'Timer');
-            updateLeaderboard(timerPrefix);
-        });
+        function stopTimer() {
+            clearInterval(bonkInterval);
+            const currentTime = new Date().getTime();
+            const elapsedTime = Math.floor((currentTime - bonkStartTime) / 1000);
+            if (elapsedTime > bonkLongestTime) {
+                bonkLongestTime = elapsedTime;
+                updateLeaderboard();
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(bonkInterval);
+            document.getElementById('bonkTimer').innerText = '00:00';
+            bonkStartTime = null;
+        }
+
+        function updateTimerDisplay() {
+            const currentTime = new Date().getTime();
+            const elapsedTime = Math.floor((currentTime - bonkStartTime) / 1000);
+            const minutes = Math.floor(elapsedTime / 60);
+            const seconds = elapsedTime % 60;
+            const displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+            const displaySeconds = seconds < 10 ? '0' + seconds : seconds;
+            document.getElementById('bonkTimer').innerText = `${displayMinutes}:${displaySeconds}`;
+        }
+
+        function updateLeaderboard() {
+            localStorage.setItem('bonkLongestTime', bonkLongestTime);
+            const longestMinutes = Math.floor(bonkLongestTime / 60);
+            const longestSeconds = bonkLongestTime % 60;
+            const displayLongestMinutes = longestMinutes < 10 ? '0' + longestMinutes : longestMinutes;
+            const displayLongestSeconds = longestSeconds < 10 ? '0' + longestSeconds : longestSeconds;
+            document.getElementById('bonkLongestTime').innerText = `${displayLongestMinutes}:${displayLongestSeconds}`;
+        }
+
+        // Initialize leaderboard on page load
+        updateLeaderboard();
     </script>
 </body>
 </html>
