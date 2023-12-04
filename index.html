@@ -3,95 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bonk Timer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-        }
-
-        .timer-container {
-            margin-bottom: 50px;
-        }
-
-        .timer {
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-        }
-    </style>
+    <title>Simple Timer</title>
 </head>
 <body>
-    <div class="timer-container">
-        <h1>Bonk Timer</h1>
-        <div id="bonkTimer" class="timer">00:00</div>
-        <button onclick="startStopTimer()">Start/Stop</button>
-        <button onclick="resetTimer()">Reset</button>
-        <div id="bonkLeaderboard">Longest Time: <span id="bonkLongestTime">00:00</span></div>
-    </div>
 
-    <script>
-        let bonkInterval;
-        let bonkStartTime;
-        let bonkLongestTime = 0;
-        function startStopTimer() {
-            if (bonkInterval) {
-                stopTimer();
-            } else {
-                startTimer();
+<h1>Simple Timer</h1>
+
+<button onclick="startTimer()">Start</button>
+<button onclick="resetTimer()">Reset</button>
+
+<p id="timer">00:00:00</p>
+
+<script>
+    let timerInterval;
+    let seconds = 0;
+    let minutes = 0;
+    let hours = 0;
+
+    function startTimer() {
+        if (!timerInterval) {
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        seconds = 0;
+        minutes = 0;
+        hours = 0;
+        updateTimer();
+    }
+
+    function updateTimer() {
+        seconds++;
+        if (seconds === 60) {
+            seconds = 0;
+            minutes++;
+            if (minutes === 60) {
+                minutes = 0;
+                hours++;
             }
         }
 
-        function startTimer() {
-            bonkStartTime = new Date().getTime();
-            bonkInterval = setInterval(updateTimerDisplay, 1000);
-        }
+        const formattedTime = pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
+        document.getElementById("timer").innerText = formattedTime;
+    }
 
-        function stopTimer() {
-            clearInterval(bonkInterval);
-            const currentTime = new Date().getTime();
-            if (bonkStartTime) {
-                const elapsedTime = Math.floor((currentTime - bonkStartTime) / 1000);
-                if (elapsedTime > bonkLongestTime) {
-                    bonkLongestTime = elapsedTime;
-                    updateLeaderboard();
-                }
-            }
-        }
+    function pad(value) {
+        return value < 10 ? "0" + value : value;
+    }
+</script>
 
-        function resetTimer() {
-            clearInterval(bonkInterval);
-            bonkStartTime = null;
-            updateTimerDisplay();
-        }
-
-        function updateTimerDisplay() {
-            const currentTime = new Date().getTime();
-            const elapsedTime = bonkStartTime ? Math.floor((currentTime - bonkStartTime) / 1000) : 0;
-            const minutes = Math.floor(elapsedTime / 60);
-            const seconds = elapsedTime % 60;
-            const displayMinutes = minutes < 10 ? '0' + minutes : minutes;
-            const displaySeconds = seconds < 10 ? '0' + seconds : seconds;
-            document.getElementById('bonkTimer').innerText = `${displayMinutes}:${displaySeconds}`;
-        }
-
-        function updateLeaderboard() {
-            localStorage.setItem('bonkLongestTime', bonkLongestTime);
-            const longestMinutes = Math.floor(bonkLongestTime / 60);
-            const longestSeconds = bonkLongestTime % 60;
-            const displayLongestMinutes = longestMinutes < 10 ? '0' + longestMinutes : longestMinutes;
-            const displayLongestSeconds = longestSeconds < 10 ? '0' + longestSeconds : longestSeconds;
-            document.getElementById('bonkLongestTime').innerText = `${displayLongestMinutes}:${displayLongestSeconds}`;
-        }
-
-        // Initialize leaderboard on page load
-        updateLeaderboard();
-    </script>
 </body>
 </html>
