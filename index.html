@@ -1,3 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persistent Timer</title>
+</head>
+<body>
+
+<h1>Persistent Timer</h1>
+
+<button onclick="startTimer()">Start</button>
+<button onclick="resetTimer()">Reset</button>
+
+<p id="timer">00:00:00</p>
+
+<script>
 let timerInterval;
 let seconds = 0;
 let minutes = 0;
@@ -68,3 +85,7 @@ function pad(value) {
 
 // Load the timer data when the page is loaded
 window.onload = loadTimer;
+</script>
+
+</body>
+</html>
